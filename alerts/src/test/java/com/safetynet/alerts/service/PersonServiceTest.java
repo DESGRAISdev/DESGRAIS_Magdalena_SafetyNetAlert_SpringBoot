@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -77,6 +78,42 @@ public class PersonServiceTest {
         verify(dataRepository, times(1)).deletePerson(firstName, lastName);
 
     }
+@Test
+public void getCommunityEmail () {
 
+        Person p1 = new Person();
+        p1.setCity("Culver");
+        p1.setEmail("p1@gmail.com");
 
+        Person p2 = new Person();
+        p2.setCity("New York");
+        p2.setEmail("p2@gmail.com");
+
+        Person p3 = new Person();
+        p3.setCity("Culver");
+        p3.setEmail("p3@gmail.com");
+
+        when (dataRepository.getPersons()).thenReturn(Arrays.asList(p1,p2,p3));
+
+        List < String> emails = personService.getCommunityEmail("Culver");
+
+        assertNotNull (emails);
+        assertEquals(2, emails.size());
+        assertTrue(emails.contains("p1@gmail.com"));
+        assertTrue(emails.contains("p3@gmail.com"));
+        assertFalse(emails.contains("p2@gmail.com"));
+}
+@Test
+public void getCommunityEmail_UnknownCity () {
+        Person p1 = new Person();
+        p1.setEmail("p1@gmail.com");
+        p1.setCity("Culver");
+        
+    when (dataRepository.getPersons()).thenReturn(Arrays.asList(p1));
+    List<String> emails = personService.getCommunityEmail("UnknownCity");
+
+    assertNotNull(emails);
+    assertTrue(emails.isEmpty());
+
+}
 }

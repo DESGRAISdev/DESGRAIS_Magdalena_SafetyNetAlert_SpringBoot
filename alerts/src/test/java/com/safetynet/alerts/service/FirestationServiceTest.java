@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -186,5 +187,28 @@ medicalRecord.setBirthDate("12/06/1999");
         assertEquals(1,result.getChildren().size());
         assertEquals(1, result.getOtherFamilyMembers().size());
     }
+
+    @Test
+    public void getPhoneAlertByFirestationNumber () {
+        Firestation firestation = new Firestation() ;
+        firestation.setAddress("29 15th St");
+        firestation.setStation("2");
+
+        Person person = new Person();
+        person.setPhone("223-2254");
+        person.setAddress("29 15th St");
+        person.setFirstName("John");
+        person.setLastName("Doe");
+
+        when(dataRepository.getFirestations()).thenReturn(Arrays.asList(firestation));
+        when(dataRepository.getPersons()).thenReturn(Arrays.asList(person));
+
+        List<String> result = firestationService.getPhoneAlertByFirestationNumber("2");
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertTrue(result.contains("223-2254"));
+    }
+
 
 }

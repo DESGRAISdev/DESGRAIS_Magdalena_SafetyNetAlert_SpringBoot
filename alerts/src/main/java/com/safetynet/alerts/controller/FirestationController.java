@@ -52,6 +52,8 @@ public class FirestationController {
         return ResponseEntity.ok(result);
     }
 
+
+
 }
 
 

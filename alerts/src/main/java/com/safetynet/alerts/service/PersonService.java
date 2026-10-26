@@ -5,6 +5,10 @@ import com.safetynet.alerts.repository.Datarepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
+
+
 @Service
 public class PersonService {
 
@@ -26,4 +30,15 @@ public class PersonService {
     public boolean deletePerson(String firstName, String lastName) {
         return dataRepository.deletePerson(firstName, lastName);
     }
+
+    public List<String> getCommunityEmail(String city) {
+        return dataRepository.getPersons().stream()
+                .filter(p -> p.getCity() != null && p.getCity().equalsIgnoreCase(city))
+                .map(Person::getEmail)
+                .filter(email -> email != null && !email.isEmpty())
+                .distinct()
+                .toList();
+    }
+
+
 }

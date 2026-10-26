@@ -16,6 +16,7 @@ import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class FirestationService {
@@ -128,7 +129,23 @@ public class FirestationService {
         }
         return 0;
     }
+    public List<String> getPhoneAlertByFirestationNumber(String stationNumber) {
+        List<String> addresses = dataRepository.getFirestations().stream()
+                .filter(f -> f.getStation().equals(stationNumber))
+                .map(Firestation::getAddress)
+                .toList();
+        if (addresses.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return dataRepository.getPersons().stream()
+                .filter(p -> addresses.contains(p.getAddress()))
+                .map(Person::getPhone)
+                .distinct()
+                .toList();
     }
+
+    }
+
 
 
 
