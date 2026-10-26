@@ -154,5 +154,37 @@ medicalRecord.setBirthDate("12/06/1999");
         assertEquals(1, result.getAdultCount());
 
     }
+@Test
+    public void getChildAlertByAddress () {
+
+        Person child = new Person();
+        child.setFirstName("Jacob");
+        child.setLastName("Boyd");
+        child.setAddress("1509 Culver St");
+
+        Person adult = new Person ();
+        adult.setFirstName("John");
+        adult.setLastName("Boyd");
+        adult.setAddress("1509 Culver St");
+
+        Medicalrecord MrChild = new Medicalrecord();
+        MrChild.setFirstName("Jacob");
+        MrChild.setLastName("Boyd");
+        MrChild.setBirthDate("10/06/2020");
+
+        Medicalrecord MrAdult = new Medicalrecord();
+        MrAdult.setFirstName("John");
+        MrAdult.setLastName("Boyd");
+        MrAdult.setBirthDate("10/06/1999");
+
+        when(dataRepository.getPersons()).thenReturn(List.of(child, adult));
+        when(dataRepository.getMedicalrecords()).thenReturn(List.of(MrChild, MrAdult));
+
+        var result = firestationService.getChildAlertByAddress("1509 Culver St");
+
+        assertNotNull(result);
+        assertEquals(1,result.getChildren().size());
+        assertEquals(1, result.getOtherFamilyMembers().size());
+    }
 
 }
