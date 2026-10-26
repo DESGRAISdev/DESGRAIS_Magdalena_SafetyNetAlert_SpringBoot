@@ -74,7 +74,7 @@ public class FirestationService {
 
         return new FirestationPersonsdto(personDtos, adultCount, childCount);
     }
-    private boolean checkIfChild(String firstName, String lastName) {
+    boolean checkIfChild(String firstName, String lastName) {
         int age = calculateAge(firstName, lastName);
         return age > 0 && age <= 18;
     }
@@ -108,7 +108,7 @@ public class FirestationService {
         return new ChildAlertDTO(children, otherMembers);
     }
 
-    private int calculateAge(String firstName, String lastName) {
+    int calculateAge(String firstName, String lastName) {
         Medicalrecord record = dataRepository.getMedicalrecords().stream()
                 .filter(m -> m.getFirstName().equalsIgnoreCase(firstName) &&
                         m.getLastName().equalsIgnoreCase(lastName))
