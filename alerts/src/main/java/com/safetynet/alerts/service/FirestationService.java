@@ -1,15 +1,12 @@
 package com.safetynet.alerts.service;
 
-import com.safetynet.alerts.dto.ChildDetailDTO;
-import com.safetynet.alerts.dto.FamilyMemberDTO;
+import com.safetynet.alerts.dto.*;
 import com.safetynet.alerts.model.Firestation;
 import com.safetynet.alerts.model.Medicalrecord;
 import com.safetynet.alerts.model.Person;
 import com.safetynet.alerts.repository.Datarepository;
-import com.safetynet.alerts.dto.ChildAlertDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.safetynet.alerts.dto.FirestationPersonsdto;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -53,12 +50,12 @@ public class FirestationService {
                 .filter(p -> addresses.contains(p.getAddress()))
                 .toList();
 
-        List<FirestationPersonsdto.PersonInfoDTO> personDtos = new ArrayList<>();
+        List<PersonInfoDTO> personDtos = new ArrayList<>();
         int adultCount = 0;
         int childCount = 0;
 
         for (Person person : residents) {
-            personDtos.add(new FirestationPersonsdto.PersonInfoDTO(
+            personDtos.add(new PersonInfoDTO(
                     person.getFirstName(),
                     person.getLastName(),
                     person.getAddress(),
@@ -144,7 +141,44 @@ public class FirestationService {
                 .toList();
     }
 
+    public FireDTO getPersonsAndStationByAddress(String address) {
+        Firestation firestation = dataRepository.getFirestations().stream()
+                .filter(f -> f.getAddress().equals(address))
+                .findFirst()
+                .orElse(null);
+
+        String stationNumber = (firestation != null) ? firestation.getStation() : "";
+
+        List<Person> personsAtAddress = dataRepository.getPersons().stream()
+                .filter(p -> p.getAddress().equals(address))
+                .collect(Collectors.toList());
+
+        List<FirePersonDTO> firePersons = new ArrayList<>();
+        for (Person person : personsAtAddress) {
+            int age = calculateAge(person.getFirstName(), person.getLastName());
+
+            Medicalrecord medicalRecord = dataRepository.getMedicalrecords().stream()
+                    .filter(m -> m.getFirstName().equalsIgnoreCase(person.getFirstName()) &&
+                            m.getLastName().equalsIgnoreCase(person.getLastName()))
+                    .findFirst()
+                    .orElse(null);
+
+            List<String> medications = (medicalRecord != null) ? medicalRecord.getMedications() : new ArrayList<>();
+            List<String> allergies = (medicalRecord != null) ? medicalRecord.getAllergies() : new ArrayList<>();
+
+            firePersons.add(new FirePersonDTO(
+                    person.getFirstName(),
+                    person.getLastName(),
+                    person.getPhone(),
+                    age,
+                    medications,
+                    allergies));
+        }
+
+        return new FireDTO(stationNumber, firePersons);
     }
+    }
+
 
 
 

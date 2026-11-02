@@ -1,5 +1,7 @@
 package com.safetynet.alerts.service;
 
+import com.safetynet.alerts.dto.PersonInfoLastNameDTO;
+import com.safetynet.alerts.model.Medicalrecord;
 import com.safetynet.alerts.model.Person;
 import com.safetynet.alerts.repository.Datarepository;
 import org.junit.jupiter.api.Test;
@@ -78,8 +80,9 @@ public class PersonServiceTest {
         verify(dataRepository, times(1)).deletePerson(firstName, lastName);
 
     }
-@Test
-public void getCommunityEmail () {
+
+    @Test
+    public void getCommunityEmail() {
 
         Person p1 = new Person();
         p1.setCity("Culver");
@@ -93,27 +96,81 @@ public void getCommunityEmail () {
         p3.setCity("Culver");
         p3.setEmail("p3@gmail.com");
 
-        when (dataRepository.getPersons()).thenReturn(Arrays.asList(p1,p2,p3));
+        when(dataRepository.getPersons()).thenReturn(Arrays.asList(p1, p2, p3));
 
-        List < String> emails = personService.getCommunityEmail("Culver");
+        List<String> emails = personService.getCommunityEmail("Culver");
 
-        assertNotNull (emails);
+        assertNotNull(emails);
         assertEquals(2, emails.size());
         assertTrue(emails.contains("p1@gmail.com"));
         assertTrue(emails.contains("p3@gmail.com"));
         assertFalse(emails.contains("p2@gmail.com"));
-}
-@Test
-public void getCommunityEmail_UnknownCity () {
+    }
+
+    @Test
+    public void getCommunityEmail_UnknownCity() {
         Person p1 = new Person();
         p1.setEmail("p1@gmail.com");
         p1.setCity("Culver");
-        
-    when (dataRepository.getPersons()).thenReturn(Arrays.asList(p1));
-    List<String> emails = personService.getCommunityEmail("UnknownCity");
 
-    assertNotNull(emails);
-    assertTrue(emails.isEmpty());
+        when(dataRepository.getPersons()).thenReturn(Arrays.asList(p1));
+        List<String> emails = personService.getCommunityEmail("UnknownCity");
 
-}
+        assertNotNull(emails);
+        assertTrue(emails.isEmpty());
+
+    }
+
+    @Test
+    public void personInfoByLastName() {
+
+        Person p1 = new Person();
+        p1.setLastName("Doe");
+        p1.setFirstName("John");
+        p1.setAddress("1509 Culver St");
+        p1.setEmail("p1@gmail.com");
+
+        Medicalrecord MrAdult1 = new Medicalrecord();
+        MrAdult1.setFirstName("John");
+        MrAdult1.setLastName("Doe");
+        MrAdult1.setBirthDate("10/06/1999");
+        MrAdult1.setMedications(Arrays.asList("azoline:100mg"));
+        MrAdult1.setAllergies(Arrays.asList("peanut"));
+
+        Person p2 = new Person();
+        p2.setLastName("Doe");
+        p2.setFirstName("Jane");
+        p2.setAddress("1509 Culver St");
+        p2.setEmail("p2@gmail.com");
+
+        Medicalrecord MrAdult2 = new Medicalrecord();
+        MrAdult2.setFirstName("Jane");
+        MrAdult2.setLastName("Doe");
+        MrAdult2.setBirthDate("10/09/1999");
+        MrAdult2.setMedications(Arrays.asList());
+        MrAdult2.setAllergies(Arrays.asList("nillacilan"));
+
+        Person p3 = new Person();
+        p3.setLastName("Boyd");
+        p3.setFirstName("John");
+        p3.setAddress("1509 Culver St");
+        p3.setEmail("p3@gmail.com");
+
+        Medicalrecord MrAdult3 = new Medicalrecord();
+        MrAdult3.setFirstName("John");
+        MrAdult3.setLastName("Boyd");
+        MrAdult3.setBirthDate("10/09/1989");
+        MrAdult3.setMedications(Arrays.asList());
+        MrAdult3.setAllergies(Arrays.asList("nillacilan"));
+
+        when(dataRepository.getPersons()).thenReturn(Arrays.asList(p1,p2,p3));
+        when(dataRepository.getMedicalrecords()).thenReturn(Arrays.asList(MrAdult1, MrAdult2,MrAdult3));
+
+        List <PersonInfoLastNameDTO> result = personService.getPersonInfoByLastName("Doe");
+
+        assertNotNull(result);
+        assertEquals(2, result.size()); 
+        assertEquals("p1@gmail.com", result.get(0).getEmail());
+
+    }
 }

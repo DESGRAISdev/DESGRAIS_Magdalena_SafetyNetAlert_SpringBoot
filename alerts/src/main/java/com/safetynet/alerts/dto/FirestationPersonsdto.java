@@ -15,13 +15,5 @@ public class FirestationPersonsdto {
     private long adultCount;
     private long childCount;
 
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class PersonInfoDTO {
-        private String firstName;
-        private String lastName;
-        private String address;
-        private String phone;
-    }
+
 }

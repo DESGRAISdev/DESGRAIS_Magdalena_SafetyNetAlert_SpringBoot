@@ -1,5 +1,6 @@
 package com.safetynet.alerts.service;
 
+import com.safetynet.alerts.dto.FireDTO;
 import com.safetynet.alerts.dto.FirestationPersonsdto;
 import com.safetynet.alerts.model.Firestation;
 import com.safetynet.alerts.model.Medicalrecord;
@@ -209,6 +210,58 @@ medicalRecord.setBirthDate("12/06/1999");
         assertEquals(1, result.size());
         assertTrue(result.contains("223-2254"));
     }
+@Test
+    public void getPersonsAndStationByAdress () {
+        Firestation firestation = new Firestation() ;
+        firestation.setStation("3");
+    firestation.setAddress("1509 Culver St");
 
+        Person person1 = new Person();
+    person1.setFirstName("John");
+    person1.setLastName("Doe");
+    person1.setPhone("223-2254");
+    person1.setAddress("1509 Culver St");
+
+    Medicalrecord MrAdult1 = new Medicalrecord();
+    MrAdult1.setFirstName("John");
+    MrAdult1.setLastName("Doe");
+    MrAdult1.setBirthDate("10/06/1999");
+    MrAdult1.setMedications(Arrays.asList("azoline:100mg"));
+    MrAdult1.setAllergies(Arrays.asList("peanut"));
+
+    Person person2 = new Person();
+    person2.setFirstName("Jane");
+    person2.setLastName("Doe");
+    person2.setPhone("223-3334");
+    person2.setAddress("1509 Culver St");
+
+    Medicalrecord MrAdult2 = new Medicalrecord();
+    MrAdult2.setFirstName("Jane");
+    MrAdult2.setLastName("Doe");
+    MrAdult2.setBirthDate("10/09/1999");
+    MrAdult2.setMedications(Arrays.asList());
+    MrAdult2.setAllergies(Arrays.asList("nillacilan"));
+
+
+    Person person3 = new Person();
+    person3.setFirstName("John");
+    person3.setLastName("Boyld");
+    person3.setPhone("223-9994");
+    person3.setAddress("29 15th St");
+
+
+    when(dataRepository.getFirestations()).thenReturn(Arrays.asList(firestation));
+    when(dataRepository.getPersons()).thenReturn(Arrays.asList(person1,person2,person3));
+    when(dataRepository.getMedicalrecords()).thenReturn(Arrays.asList(MrAdult1, MrAdult2));
+
+    FireDTO result = firestationService.getPersonsAndStationByAddress("1509 Culver St");
+
+    assertNotNull(result);
+    assertEquals("3", result.getStationNumber());
+    assertEquals(2, result.getPersons().size());
+
+    assertEquals("John", result.getPersons().get(0).getFirstName());
+    assertEquals("223-2254", result.getPersons().get(0).getPhone());
+}
 
 }
