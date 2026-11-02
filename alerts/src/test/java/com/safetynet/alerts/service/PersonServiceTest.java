@@ -169,7 +169,7 @@ public class PersonServiceTest {
         List <PersonInfoLastNameDTO> result = personService.getPersonInfoByLastName("Doe");
 
         assertNotNull(result);
-        assertEquals(2, result.size()); 
+        assertEquals(2, result.size());
         assertEquals("p1@gmail.com", result.get(0).getEmail());
 
     }

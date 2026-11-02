@@ -177,7 +177,51 @@ public class FirestationService {
 
         return new FireDTO(stationNumber, firePersons);
     }
+
+    public List <FloodStationDTO> getFloodStations (List <String> stationNumbers){
+
+        List<String> addresses = dataRepository.getFirestations().stream()
+                .filter(f -> stationNumbers.contains(f.getStation()))
+                .map(Firestation::getAddress)
+                .distinct()
+                .toList();
+
+        List<FloodStationDTO> result = new ArrayList<>();
+
+        for (String address : addresses) {
+            List<Person> residents = dataRepository.getPersons().stream()
+                    .filter(p -> p.getAddress() != null && p.getAddress().equalsIgnoreCase(address))
+                    .toList();
+            List<FloodPersonDTO> floodPersons = new ArrayList<>();
+            for (Person person : residents) {
+                int age = calculateAge(person.getFirstName(), person.getLastName());
+
+                Medicalrecord medicalRecord = dataRepository.getMedicalrecords().stream()
+                        .filter(m -> m.getFirstName().equalsIgnoreCase(person.getFirstName()) &&
+                                m.getLastName().equalsIgnoreCase(person.getLastName()))
+                        .findFirst()
+                        .orElse(null);
+
+                List<String> medications = (medicalRecord != null) ? medicalRecord.getMedications() : new ArrayList<>();
+                List<String> allergies = (medicalRecord != null) ? medicalRecord.getAllergies() : new ArrayList<>();
+
+                floodPersons.add(new FloodPersonDTO(
+                        person.getFirstName(),
+                        person.getLastName(),
+                        person.getPhone(),
+                        age,
+                        medications,
+                        allergies
+                ));
+            }
+
+            result.add(new FloodStationDTO(address, floodPersons));
+        }
+
+        return result;
     }
+    }
+
 
 
 

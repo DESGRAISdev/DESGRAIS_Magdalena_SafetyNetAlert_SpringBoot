@@ -2,6 +2,7 @@ package com.safetynet.alerts.service;
 
 import com.safetynet.alerts.dto.FireDTO;
 import com.safetynet.alerts.dto.FirestationPersonsdto;
+import com.safetynet.alerts.dto.FloodStationDTO;
 import com.safetynet.alerts.model.Firestation;
 import com.safetynet.alerts.model.Medicalrecord;
 import com.safetynet.alerts.model.Person;
@@ -263,5 +264,53 @@ medicalRecord.setBirthDate("12/06/1999");
     assertEquals("John", result.getPersons().get(0).getFirstName());
     assertEquals("223-2254", result.getPersons().get(0).getPhone());
 }
+    @Test
+    public void getFloodStations() {
+        List<String> stationNumbers = List.of("3");
 
+        Firestation firestation = new Firestation();
+        firestation.setAddress("1509 Culver St");
+        firestation.setStation("3");
+
+        Person person = new Person();
+        person.setFirstName("John");
+        person.setLastName("Doe");
+        person.setAddress("1509 Culver St");
+        person.setPhone("841-841");
+
+        Medicalrecord medicalRecord = new Medicalrecord();
+        medicalRecord.setFirstName("John");
+        medicalRecord.setLastName("Doe");
+        medicalRecord.setBirthDate("03/02/1993");
+        medicalRecord.setMedications(List.of("paracetamol:100mg"));
+        medicalRecord.setAllergies(List.of("none"));
+
+        Person person2 = new Person();
+        person2.setFirstName("Jane");
+        person2.setLastName("Doe");
+        person2.setAddress("1509 Culver St");
+        person2.setPhone("841-841");
+
+        Medicalrecord medicalRecord2 = new Medicalrecord();
+        medicalRecord2.setFirstName("Jane");
+        medicalRecord2.setLastName("Doe");
+        medicalRecord2.setBirthDate("03/02/1989");
+        medicalRecord2.setMedications(List.of("paracetamol:100mg"));
+        medicalRecord2.setAllergies(List.of("peanut"));
+
+        when(dataRepository.getFirestations()).thenReturn(List.of(firestation));
+        when(dataRepository.getPersons()).thenReturn(List.of(person,person2));
+        when(dataRepository.getMedicalrecords()).thenReturn(List.of(medicalRecord,medicalRecord2));
+
+        List<FloodStationDTO> result = firestationService.getFloodStations(stationNumbers);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("1509 Culver St", result.get(0).getAddress());
+
+        assertEquals(2, result.get(0).getPersons().size());
+        assertEquals("John", result.get(0).getPersons().get(0).getFirstName());
+        assertEquals("Jane", result.get(0).getPersons().get(1).getFirstName());
+
+    }
 }

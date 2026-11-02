@@ -18,8 +18,7 @@ public class MedicalrecordService {
     }
 
     public Medicalrecord addMedicalrecord(Medicalrecord medicalrecord) {
-        dataRepository.getMedicalrecords().add(medicalrecord);
-        return medicalrecord;
+        return dataRepository.saveMedicalrecord(medicalrecord);
     }
 
     public Medicalrecord updateMedicalrecord(Medicalrecord medicalrecord) {
@@ -38,10 +37,7 @@ public class MedicalrecordService {
     }
 
     public boolean deleteMedicalrecord(String firstName, String lastName) {
-        List<Medicalrecord> records = dataRepository.getMedicalrecords();
-        return records.removeIf(mr ->
-                mr.getFirstName().equalsIgnoreCase(firstName) &&
-                        mr.getLastName().equalsIgnoreCase(lastName)
-        );
+        return dataRepository.deleteMedicalrecord(firstName, lastName);
+
     }
 }
