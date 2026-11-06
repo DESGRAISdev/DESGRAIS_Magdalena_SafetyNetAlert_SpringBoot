@@ -8,9 +8,6 @@ import com.safetynet.alerts.repository.Datarepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,12 +20,10 @@ public class FirestationService {
     @Autowired
     public FirestationService(Datarepository dataRepository) {
         this.dataRepository = dataRepository;
-
     }
 
     public Firestation addFirestation(Firestation firestation) {
         return dataRepository.saveFirestation(firestation);
-
     }
 
     public Firestation updateFirestation(Firestation firestation) {
@@ -39,8 +34,18 @@ public class FirestationService {
         return dataRepository.deleteFirestation(address, station);
     }
 
-    public FirestationPersonsdto getPersonsByStationNumber(String stationNumber) {
+    /**
+     * Méthode utilitaire privée pour éviter de dupliquer la recherche de dossier médical
+     */
+    private Medicalrecord findMedicalrecord(String firstName, String lastName) {
+        return dataRepository.getMedicalrecords().stream()
+                .filter(m -> m.getFirstName().equalsIgnoreCase(firstName) &&
+                        m.getLastName().equalsIgnoreCase(lastName))
+                .findFirst()
+                .orElse(null);
+    }
 
+    public FirestationPersonsdto getPersonsByStationNumber(String stationNumber) {
         List<String> addresses = dataRepository.getFirestations().stream()
                 .filter(f -> f.getStation().equalsIgnoreCase(stationNumber))
                 .map(Firestation::getAddress)
@@ -72,12 +77,14 @@ public class FirestationService {
 
         return new FirestationPersonsdto(personDtos, adultCount, childCount);
     }
+
     boolean checkIfChild(String firstName, String lastName) {
-        int age = calculateAge(firstName, lastName);
+        Medicalrecord record = findMedicalrecord(firstName, lastName);
+        int age = (record != null) ? record.calculateAge() : 0;
         return age > 0 && age <= 18;
     }
-    public ChildAlertDTO getChildAlertByAddress(String address) {
 
+    public ChildAlertDTO getChildAlertByAddress(String address) {
         List<Person> residents = dataRepository.getPersons().stream()
                 .filter(p -> p.getAddress().equalsIgnoreCase(address))
                 .toList();
@@ -86,15 +93,18 @@ public class FirestationService {
         List<FamilyMemberDTO> otherMembers = new ArrayList<>();
 
         for (Person person : residents) {
-            int age = calculateAge(person.getFirstName(), person.getLastName());
+            Medicalrecord record = findMedicalrecord(person.getFirstName(), person.getLastName());
+            int age = (record != null) ? record.calculateAge() : 0;
 
             if (age <= 18) {
-                children.add(new ChildDetailDTO(person.getFirstName(),
+                children.add(new ChildDetailDTO(
+                        person.getFirstName(),
                         person.getLastName(),
                         age
                 ));
             } else {
-                otherMembers.add(new FamilyMemberDTO(person.getFirstName(),
+                otherMembers.add(new FamilyMemberDTO(
+                        person.getFirstName(),
                         person.getLastName()
                 ));
             }
@@ -106,26 +116,6 @@ public class FirestationService {
         return new ChildAlertDTO(children, otherMembers);
     }
 
-    int calculateAge(String firstName, String lastName) {
-        Medicalrecord record = dataRepository.getMedicalrecords().stream()
-                .filter(m -> m.getFirstName().equalsIgnoreCase(firstName) &&
-                        m.getLastName().equalsIgnoreCase(lastName))
-                .findFirst()
-                .orElse(null);
-
-        if (record != null && record.getBirthDate() != null) {
-            try {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-                LocalDate birthDate = LocalDate.parse(record.getBirthDate(), formatter);
-                int age = Period.between(birthDate, LocalDate.now()).getYears();
-                return age;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return 0;
-            }
-        }
-        return 0;
-    }
     public List<String> getPhoneAlertByFirestationNumber(String stationNumber) {
         List<String> addresses = dataRepository.getFirestations().stream()
                 .filter(f -> f.getStation().equals(stationNumber))
@@ -155,14 +145,9 @@ public class FirestationService {
 
         List<FirePersonDTO> firePersons = new ArrayList<>();
         for (Person person : personsAtAddress) {
-            int age = calculateAge(person.getFirstName(), person.getLastName());
+            Medicalrecord medicalRecord = findMedicalrecord(person.getFirstName(), person.getLastName());
 
-            Medicalrecord medicalRecord = dataRepository.getMedicalrecords().stream()
-                    .filter(m -> m.getFirstName().equalsIgnoreCase(person.getFirstName()) &&
-                            m.getLastName().equalsIgnoreCase(person.getLastName()))
-                    .findFirst()
-                    .orElse(null);
-
+            int age = (medicalRecord != null) ? medicalRecord.calculateAge() : 0;
             List<String> medications = (medicalRecord != null) ? medicalRecord.getMedications() : new ArrayList<>();
             List<String> allergies = (medicalRecord != null) ? medicalRecord.getAllergies() : new ArrayList<>();
 
@@ -178,8 +163,7 @@ public class FirestationService {
         return new FireDTO(stationNumber, firePersons);
     }
 
-    public List <FloodStationDTO> getFloodStations (List <String> stationNumbers){
-
+    public List<FloodStationDTO> getFloodStations(List<String> stationNumbers) {
         List<String> addresses = dataRepository.getFirestations().stream()
                 .filter(f -> stationNumbers.contains(f.getStation()))
                 .map(Firestation::getAddress)
@@ -194,14 +178,9 @@ public class FirestationService {
                     .toList();
             List<FloodPersonDTO> floodPersons = new ArrayList<>();
             for (Person person : residents) {
-                int age = calculateAge(person.getFirstName(), person.getLastName());
+                Medicalrecord medicalRecord = findMedicalrecord(person.getFirstName(), person.getLastName());
 
-                Medicalrecord medicalRecord = dataRepository.getMedicalrecords().stream()
-                        .filter(m -> m.getFirstName().equalsIgnoreCase(person.getFirstName()) &&
-                                m.getLastName().equalsIgnoreCase(person.getLastName()))
-                        .findFirst()
-                        .orElse(null);
-
+                int age = (medicalRecord != null) ? medicalRecord.calculateAge() : 0;
                 List<String> medications = (medicalRecord != null) ? medicalRecord.getMedications() : new ArrayList<>();
                 List<String> allergies = (medicalRecord != null) ? medicalRecord.getAllergies() : new ArrayList<>();
 
@@ -220,7 +199,7 @@ public class FirestationService {
 
         return result;
     }
-    }
+}
 
 
 

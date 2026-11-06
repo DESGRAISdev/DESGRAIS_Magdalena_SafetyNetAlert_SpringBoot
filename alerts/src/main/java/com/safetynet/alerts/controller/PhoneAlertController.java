@@ -24,11 +24,11 @@ import java.util.List;
         }
         @GetMapping("/phoneAlert")
         public List<String> getPhoneAlertByFirestation(@RequestParam String firestation) {
-            logger.info("Requête reçue pour l'endpoint /phoneAlert avec la caserne : {}", firestation);
+            logger.info("Requête reçue : GET /phoneAlert avec le numéro de caserne : {}", firestation);
 
             List<String> phoneNumbers = firestationService.getPhoneAlertByFirestationNumber(firestation);
 
-            logger.info("Réponse envoyée pour /phoneAlert : {} numéros trouvés", phoneNumbers.size());
+            logger.info("Réponse envoyée avec succès pour l'endpoint /phoneAlert");
             return phoneNumbers;
         }
 }

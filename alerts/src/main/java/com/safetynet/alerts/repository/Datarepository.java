@@ -8,7 +8,7 @@ import com.safetynet.alerts.model.Person;
 import jakarta.annotation.PostConstruct;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Repository;
-import tools.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 import java.io.IOException;

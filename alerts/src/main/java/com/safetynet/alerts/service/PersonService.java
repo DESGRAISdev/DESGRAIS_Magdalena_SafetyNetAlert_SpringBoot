@@ -8,9 +8,7 @@ import com.safetynet.alerts.repository.Datarepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.format.DateTimeFormatter;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,13 +53,14 @@ public class PersonService {
                 .toList();
 
         for (Person person : matchedPersons) {
-            int age = calculateAge(person.getFirstName(), person.getLastName());
-
             Medicalrecord medicalRecord = dataRepository.getMedicalrecords().stream()
                     .filter(m -> m.getFirstName().equalsIgnoreCase(person.getFirstName()) &&
                             m.getLastName().equalsIgnoreCase(person.getLastName()))
                     .findFirst()
                     .orElse(null);
+
+            // On utilise directement la méthode encapsulée dans Medicalrecord !
+            int age = (medicalRecord != null) ? medicalRecord.calculateAge() : 0;
 
             List<String> medications = (medicalRecord != null) ? medicalRecord.getMedications() : new ArrayList<>();
             List<String> allergies = (medicalRecord != null) ? medicalRecord.getAllergies() : new ArrayList<>();
@@ -78,24 +77,6 @@ public class PersonService {
         return result;
     }
 
-    private int calculateAge(String firstName, String lastName) {
-        Medicalrecord record = dataRepository.getMedicalrecords().stream()
-                .filter(m -> m.getFirstName().equalsIgnoreCase(firstName) &&
-                        m.getLastName().equalsIgnoreCase(lastName))
-                .findFirst()
-                .orElse(null);
+       }
 
-        if (record != null && record.getBirthDate() != null) {
-            try {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-                LocalDate birthDate = LocalDate.parse(record.getBirthDate(), formatter);
-                return Period.between(birthDate, LocalDate.now()).getYears();
-            } catch (Exception e) {
-                e.printStackTrace();
-                return 0;
-            }
-        }
-        return 0;
-    }
-}
 

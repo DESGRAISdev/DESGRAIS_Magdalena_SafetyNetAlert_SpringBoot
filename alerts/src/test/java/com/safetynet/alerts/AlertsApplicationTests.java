@@ -9,5 +9,8 @@ class AlertsApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
+	@Test
+	void testMain() {
+		AlertsApplication.main(new String[]{});
+	}
 }

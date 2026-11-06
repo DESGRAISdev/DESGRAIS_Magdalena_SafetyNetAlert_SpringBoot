@@ -23,11 +23,13 @@ public class CommunityEmailController {
 
     @GetMapping("/communityEmail")
     public List<String> getCommunityEmail(@RequestParam String city) {
-        logger.info("Requête reçue pour l'endpoint /communityEmail avec la ville : {}", city);
+        logger.info("Requête reçue : /communityEmail avec la ville : {}", city);
 
         List<String> emails = personService.getCommunityEmail(city);
 
-        logger.info("Réponse envoyée pour /communityEmail : {} e-mails trouvés", emails.size());
+        // Version simplifiée et plus propre suggérée
+        logger.info("Réponse envoyée avec succès pour l'endpoint /communityEmail");
+
         return emails;
     }
 }
